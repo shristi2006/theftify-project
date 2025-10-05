@@ -1,0 +1,13 @@
+# Dependencies
+/node_modules
+/frontend/node_modules
+
+# Environment variables
+.env
+
+# Build files
+/frontend/dist
+
+# Logs and OS files
+npm-debug.log*
+.DS_Store
