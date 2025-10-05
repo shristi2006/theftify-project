@@ -1,11 +1,22 @@
 import mongoose from "mongoose";
 
 export const connectDB = async () => {
-	try {
-		const conn = await mongoose.connect(process.env.MONGO_URI);
-		console.log(`MongoDB Connected: ${conn.connection.host}`);
-	} catch (error) {
-		console.error(`Error: ${error.message}`);
-		process.exit(1); // process code 1 code means exit with failure, 0 means success
-	}
+    try {
+        console.log('Attempting to connect to MongoDB...');
+        
+        // Add Stable API version options
+        const conn = await mongoose.connect(process.env.MONGO_URI, {
+            serverApi: {
+                version: '1',
+                strict: true,
+                deprecationErrors: true,
+            },
+            serverSelectionTimeoutMS: 10000,
+        });
+        
+        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    } catch (error) {
+        console.error(`❌ Error connecting to MongoDB: ${error.message}`);
+        process.exit(1); 
+    }
 };
