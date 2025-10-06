@@ -1,22 +1,23 @@
-import { Route, Routes } from "react-router";
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+//importing pages
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import SearchPage from "./pages/SearchPage";
 import UploadPage from "./pages/UploadPage";
-import toast from "react-hot-toast";
+import AboutUs from "./pages/AboutUs";
 
 const App = () => {
   return (
-    <div data-theme="forest">
-      <button className="btn btn-primary" onClick={() => toast.success("congrats")}>click me</button>
+    <BrowserRouter>
       <Routes>
+        {/* defining routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/upload" element={<UploadPage />} />
+        <Route path="/about" element={<AboutUs />} />
       </Routes>
-    </div>
+    </BrowserRouter>
   );
 };
 export default App;

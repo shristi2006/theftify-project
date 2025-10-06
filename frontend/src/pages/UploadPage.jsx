@@ -1,9 +1,8 @@
-import React from 'react'
+import React from "react";
+import Navbar from "../components/Navbar";
 
 const Upload = () => {
-  return (
-    <div>upload</div>
-  )
+  return <Navbar />;
 }
 
-export default Upload
+export default Upload;
