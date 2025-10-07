@@ -4,7 +4,6 @@ export const connectDB = async () => {
     try {
         console.log('Attempting to connect to MongoDB...');
         
-        // Add Stable API version options
         const conn = await mongoose.connect(process.env.MONGO_URI, {
             serverApi: {
                 version: '1',

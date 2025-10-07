@@ -2,6 +2,7 @@
   "name": "theftify-project",
   "version": "1.0.0",
   "main": "backend/server.js",
+  "type": "module",
   "scripts": {
     "start": "node backend/server.js",
     "server": "nodemon backend/server.js",
@@ -9,18 +10,28 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "npm install --prefix frontend && npm run build --prefix frontend"
   },
-  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "mongodb": "^6.20.0",
-    "mongoose": "^8.19.0"
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-session": "^1.18.2",
+    "http-errors": "^2.0.0",
+    "mongoose": "^8.19.1",
+    "morgan": "^1.10.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^8.0.0",
+    "react-router-dom": "^7.9.3",
+    "tailwindcss": "^4.1.14"
   },
   "devDependencies": {
+    "@types/node": "^24.7.0",
     "concurrently": "^9.2.1",
     "nodemon": "^3.1.10"
   }

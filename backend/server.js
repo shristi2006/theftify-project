@@ -1,42 +1,84 @@
+// server.js
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
-
-console.log('Current directory:', process.cwd());
-console.log('Loading .env from:', path.resolve(process.cwd(), '.env'));
-
-// Import the database connection function
+import { fileURLToPath } from 'url';
+import logger from 'morgan';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import passport from 'passport';
+import createError from 'http-errors';
 import { connectDB } from "./config/db.js";
 
-// Load environment variables from the root folder
+// Models & Passport Strategy
+import userModel from "./models/users.js";
+import { Strategy as LocalStrategy } from "passport-local";
+
+// Route Imports
+import userRoutes from './routes/userRoutes.js'; 
+import postRoutes from './routes/postRoutes.js'; 
+
+// --- ENVIRONMENT SETUP ---
 dotenv.config();
 
-// Add this to see what was loaded
-console.log('MONGO_URI:', process.env.MONGO_URI ? 'EXISTS' : 'UNDEFINED');
-console.log('PORT:', process.env.PORT);
-console.log('NODE_ENV:', process.env.NODE_ENV);
+// Fix for __dirname and __filename in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+// --- APP INITIALIZATION & DB CONNECTION ---
 const app = express();
 const PORT = process.env.PORT || 5000;
+connectDB(); 
 
-// Resolve root directory path
-const __dirname = path.resolve();
+// --- VIEW ENGINE & GENERAL MIDDLEWARE ---
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(express.json()); // allows us to accept JSON data in the req.body
+// --- SESSION & PASSPORT CONFIGURATION ---
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'a_secure_default_secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 24 * 60 * 60 * 1000 } // 1 day
+}));
 
-// NOTE: Add your routes back here once you create product.route.js
-// app.use("/api/products", productRoutes);
+app.use(passport.initialize());
+app.use(passport.session());
 
-if (process.env.NODE_ENV === "production") {
-    // Serve static files from the client build folder (assuming client is in root)
-    app.use(express.static(path.join(__dirname, "/frontend/dist")));
-    app.get("*", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
-    });
-}
+// Passport setup
+passport.use(new LocalStrategy(userModel.authenticate()));
+passport.serializeUser(userModel.serializeUser());
+passport.deserializeUser(userModel.deserializeUser());
 
-// Connect to the DB first, then start the server
-connectDB();
+
+// --- ROUTE REGISTRATION ---
+app.use('/', userRoutes); 
+app.use('/post', postRoutes); 
+// Combined interaction logic into postRoutes for simplicity: app.use('/interact', postRoutes); 
+
+
+// --- ERROR HANDLERS ---
+// Catch 404
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// Basic error handler
+app.use(function(err, req, res, next) {
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  res.status(err.status || 500);
+  res.render('error', { title: 'Error' }); // Render error page
+});
+
+
+// --- START SERVER ---
 app.listen(PORT, () => {
-    console.log("Server started at http://localhost:" + PORT);
+    console.log(`Server started at http://localhost:${PORT}`);
 });
