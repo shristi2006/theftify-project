@@ -9,6 +9,7 @@ import session from 'express-session';
 import passport from 'passport';
 import createError from 'http-errors';
 import { connectDB } from "./config/db.js";
+import apiRoutes from './routes/apiRoutes.js';
 
 // Models & Passport Strategy
 import userModel from "./models/users.js";
@@ -31,13 +32,11 @@ const PORT = process.env.PORT || 5000;
 connectDB(); 
 
 // --- VIEW ENGINE & GENERAL MIDDLEWARE ---
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); 
 
 // --- SESSION & PASSPORT CONFIGURATION ---
 app.use(session({
@@ -54,7 +53,7 @@ app.use(passport.session());
 passport.use(new LocalStrategy(userModel.authenticate()));
 passport.serializeUser(userModel.serializeUser());
 passport.deserializeUser(userModel.deserializeUser());
-
+app.use('/api', apiRoutes);
 
 // --- ROUTE REGISTRATION ---
 app.use('/', userRoutes); 
@@ -65,19 +64,22 @@ app.use('/post', postRoutes);
 // --- ERROR HANDLERS ---
 // Catch 404
 app.use(function(req, res, next) {
-  next(createError(404));
+  // If the request didn't match any route, return 404 JSON
+  res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
 });
 
 // Basic error handler
 app.use(function(err, req, res, next) {
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  res.status(err.status || 500);
-  res.render('error', { title: 'Error' }); // Render error page
+  const status = err.status || 500;
+  
+  // Return error details as JSON
+  res.status(status).json({
+    success: false,
+    message: err.message,
+    // Include stack trace only in development
+    error: req.app.get('env') === 'development' ? err : {}
+  });
 });
-
-
 // --- START SERVER ---
 app.listen(PORT, () => {
     console.log(`Server started at http://localhost:${PORT}`);

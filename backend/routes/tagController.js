@@ -1,26 +1,26 @@
-const express = require('express');
-const router = express.Router();
-const tagModel = require("./tags");
-const { isLoggedIn } = require('./userRoutes');
+import express from 'express';
+import tagModel from '../models/tags.js';
+import { isLoggedIn } from './userRoutes.js';
 
-// Get all posts associated with a specific tag
+const router = express.Router();
+
 router.get('/:tagName', isLoggedIn, async (req, res, next) => {
     try {
         const tag = await tagModel.findOne({ name: req.params.tagName.toLowerCase() })
             .populate({
                 path: 'posts',
-                populate: { path: 'user' } // Populate the user for each post
+                populate: { path: 'user' }
             })
             .exec();
 
         if (!tag) {
-            return res.status(404).send(`No posts found for tag: #${req.params.tagName}`);
+            return res.status(404).json({ message: `No posts found for tag: #${req.params.tagName}` });
         }
 
-        res.render('tagPage', { tagName: tag.name, posts: tag.posts });
+        res.json({ tagName: tag.name, posts: tag.posts });
     } catch (err) {
         next(err);
     }
 });
 
-module.exports = router;
+export default router;
