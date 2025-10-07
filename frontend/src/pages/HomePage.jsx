@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 
 import Navbar from "../components/Navbar";
 import PostCard from "../components/PostCard";
@@ -16,6 +17,7 @@ const allPosts = [
 ];
 
 export default function HomePage() {
+  const { isAuthenticated } = useAuth0(); 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [activeFeedTab, setActiveFeedTab] = useState("Following");
 
@@ -84,9 +86,12 @@ export default function HomePage() {
           </div>
         </main>
 
-        <aside className="hidden lg:block lg:w-1/5">
+        {/* <<< CHANGE #3: Conditionally render the entire right sidebar */}
+        {isAuthenticated && (
+          <aside className="hidden lg:block lg:w-1/s5">
              <ProfileCard />
-        </aside>
+          </aside>
+        )}
       </div>
       <NewUpload />
     </div>
